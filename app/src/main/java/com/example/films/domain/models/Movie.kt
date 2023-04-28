@@ -1,6 +1,6 @@
-package com.example.films
+package com.example.films.domain.models
 
-data class Films(
+data class Movie(
     val id: String,
     val resultType: String,
     val image: String,
