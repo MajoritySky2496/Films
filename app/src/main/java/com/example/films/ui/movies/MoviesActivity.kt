@@ -23,10 +23,11 @@ import com.example.films.presentation.MoviesView
 import com.example.films.ui.movies.models.MoviesState
 import com.example.films.ui.poster.PosterActivity
 import com.example.films.util.MoviesApplication
+import moxy.MvpActivity
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
-class MoviesActivity : Activity(), MoviesView {
+class MoviesActivity : MvpActivity(), MoviesView {
 
     lateinit var queryInput: EditText
     lateinit var placeholderMessage: TextView
@@ -34,9 +35,6 @@ class MoviesActivity : Activity(), MoviesView {
     lateinit var progressBar: ProgressBar
     private var textWatcher: TextWatcher? = null
 
-    companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 1000L
-    }
 
     private val adapter = MoviesAdapter {
         if (clickDebounce()) {
@@ -46,12 +44,13 @@ class MoviesActivity : Activity(), MoviesView {
         }
     }
 
+
     private var isClickAllowed = true
 
     private val handler = Handler(Looper.getMainLooper())
 
     @InjectPresenter
-     lateinit var moviesSearchPresenter:MoviesSearchPresenter
+    lateinit var moviesSearchPresenter: MoviesSearchPresenter
 
     @ProvidePresenter
     fun providePresenter(): MoviesSearchPresenter {
@@ -61,7 +60,7 @@ class MoviesActivity : Activity(), MoviesView {
     }
 
 
-        override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movies)
         queryInput = findViewById<EditText>(R.id.queryInput)
@@ -69,6 +68,8 @@ class MoviesActivity : Activity(), MoviesView {
         moviesList = findViewById<RecyclerView>(R.id.locations)
         progressBar = findViewById<ProgressBar>(R.id.progressBar)
         moviesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+
         moviesList.adapter = adapter
 
 
@@ -86,7 +87,7 @@ class MoviesActivity : Activity(), MoviesView {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter?.searchDebounce(changedText = s?.toString() ?: "")
+                moviesSearchPresenter.searchDebounce(changedText = s?.toString() ?: "")
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -99,6 +100,7 @@ class MoviesActivity : Activity(), MoviesView {
 
         }
     }
+
     private fun clickDebounce(): Boolean {
         val current = isClickAllowed
         if (isClickAllowed) {
@@ -117,13 +119,13 @@ class MoviesActivity : Activity(), MoviesView {
         }
     }
 
-     fun showLoading() {
+    fun showLoading() {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
     }
 
-     fun showError(errorMessage: String) {
+    fun showError(errorMessage: String) {
         moviesList.visibility = View.GONE
         placeholderMessage.visibility = View.VISIBLE
         progressBar.visibility = View.GONE
@@ -131,11 +133,11 @@ class MoviesActivity : Activity(), MoviesView {
         placeholderMessage.text = errorMessage
     }
 
-     fun showEmpty(emptyMessage: String) {
+    fun showEmpty(emptyMessage: String) {
         showError(emptyMessage)
     }
 
-     fun showContent(movies: List<Movie>) {
+    fun showContent(movies: List<Movie>) {
         moviesList.visibility = View.VISIBLE
         placeholderMessage.visibility = View.GONE
         progressBar.visibility = View.GONE
@@ -148,4 +150,9 @@ class MoviesActivity : Activity(), MoviesView {
     override fun makeToast(additionalMessage: String) {
         Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG).show()
     }
+
+    companion object {
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
+    }
+
 }
