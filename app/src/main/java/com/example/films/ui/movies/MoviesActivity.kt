@@ -35,7 +35,7 @@ class MoviesActivity : Activity(), MoviesView {
     private var textWatcher: TextWatcher? = null
 
     companion object {
-        private const val CLICK_DEBOUNCE_DELAY = 10000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 
     private val adapter = MoviesAdapter {
@@ -51,7 +51,7 @@ class MoviesActivity : Activity(), MoviesView {
     private val handler = Handler(Looper.getMainLooper())
 
     @InjectPresenter
-    lateinit var moviesSearchPresenter:MoviesSearchPresenter
+     lateinit var moviesSearchPresenter:MoviesSearchPresenter
 
     @ProvidePresenter
     fun providePresenter(): MoviesSearchPresenter {
@@ -86,7 +86,7 @@ class MoviesActivity : Activity(), MoviesView {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter.searchDebounce(changedText = s?.toString() ?: "")
+                moviesSearchPresenter?.searchDebounce(changedText = s?.toString() ?: "")
             }
 
             override fun afterTextChanged(s: Editable?) {
