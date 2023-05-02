@@ -1,6 +1,5 @@
 package com.example.films.ui.movies
 
-import android.app.Activity
 import android.content.Intent
 
 import android.os.Bundle
@@ -13,21 +12,23 @@ import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.films.util.Creator
 import com.example.films.R
 import com.example.films.domain.models.Movie
-import com.example.films.presentation.MoviesSearchPresenter
+import com.example.films.presentation.MoviesSearchViewModel
 import com.example.films.presentation.MoviesView
 import com.example.films.ui.movies.models.MoviesState
+import com.example.films.ui.movies.models.ToastState
 import com.example.films.ui.poster.PosterActivity
-import com.example.films.util.MoviesApplication
 import moxy.MvpActivity
 import moxy.presenter.InjectPresenter
 import moxy.presenter.ProvidePresenter
 
-class MoviesActivity : MvpActivity(), MoviesView {
+class MoviesActivity : ComponentActivity() {
 
     lateinit var queryInput: EditText
     lateinit var placeholderMessage: TextView
@@ -49,20 +50,15 @@ class MoviesActivity : MvpActivity(), MoviesView {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    @InjectPresenter
-    lateinit var moviesSearchPresenter: MoviesSearchPresenter
+    private lateinit var viewModel:MoviesSearchViewModel
 
-    @ProvidePresenter
-    fun providePresenter(): MoviesSearchPresenter {
-        return Creator.provideMoviesSearchPresenter(
-            context = this.applicationContext,
-        )
-    }
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movies)
+
         queryInput = findViewById<EditText>(R.id.queryInput)
         placeholderMessage = findViewById<TextView>(R.id.placeholderMessage)
         moviesList = findViewById<RecyclerView>(R.id.locations)
@@ -70,7 +66,9 @@ class MoviesActivity : MvpActivity(), MoviesView {
         moviesList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
 
+
         moviesList.adapter = adapter
+        viewModel = ViewModelProvider(this, MoviesSearchViewModel.getViewModelFactory())[MoviesSearchViewModel::class.java]
 
 
 
@@ -87,12 +85,19 @@ class MoviesActivity : MvpActivity(), MoviesView {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                moviesSearchPresenter.searchDebounce(changedText = s?.toString() ?: "")
+                viewModel.searchDebounce(changedText = s?.toString() ?: "")
             }
 
             override fun afterTextChanged(s: Editable?) {
             }
 
+        }
+        viewModel.observerState().observe(this) {
+            render(it)
+        }
+
+        viewModel.observeShowToast().observe(this){
+               makeToast(it)
         }
         textWatcher?.let {
             queryInput.addTextChangedListener(it)
@@ -110,7 +115,7 @@ class MoviesActivity : MvpActivity(), MoviesView {
         return current
     }
 
-    override fun render(state: MoviesState) {
+     fun render(state: MoviesState) {
         when (state) {
             is MoviesState.Loading -> showLoading()
             is MoviesState.Content -> showContent(state.movies)
@@ -147,7 +152,7 @@ class MoviesActivity : MvpActivity(), MoviesView {
         adapter.notifyDataSetChanged()
     }
 
-    override fun makeToast(additionalMessage: String) {
+    fun makeToast(additionalMessage: String) {
         Toast.makeText(this, additionalMessage, Toast.LENGTH_LONG).show()
     }
 
