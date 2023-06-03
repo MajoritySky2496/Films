@@ -17,5 +17,15 @@ class MoviesInteractorImpl(private var repository: MoviesRepository):MoviesInter
         }
     }
 
+    override fun searchDetails(movieId: String, consumer: MoviesInteractor.MoviesDetailConsumer) {
+        executor.execute {
+            when(val resource = repository.searchDetailMovies(movieId)){
+                is Resource.Success -> {consumer.consumeDetails(resource.data, null)}
+                is Resource.Error -> {consumer.consumeDetails(null, resource.message
+                )}
+            }
+        }
+    }
+
 
 }

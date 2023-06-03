@@ -7,12 +7,16 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import com.example.films.data.NetworkClient
 import com.example.films.data.dto.MoviesSearchRequest
+import com.example.films.data.dto.MovieDetailsRequest
+import com.example.films.data.dto.MoviesSearchResponse
 import com.example.films.data.dto.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class RetrofitNetworkClient(private val context: Context):NetworkClient {
     private val imdbBaseUrl = "https://imdb-api.com"
+    lateinit var response: Response
+
 
 
     private val retrofit = Retrofit.Builder()
@@ -28,10 +32,12 @@ class RetrofitNetworkClient(private val context: Context):NetworkClient {
         if(isConnected() == false){
             return Response().apply { resultCode = -1 }
         }
-        if (dto !is MoviesSearchRequest) {
+        if ((dto !is MoviesSearchRequest)&&(dto !is MovieDetailsRequest)) {
             return Response().apply { resultCode = 400 }
         }
-        val response = imdbService.searchMovies(dto.expression).execute()
+        val response = if(dto is MoviesSearchRequest){ imdbService.searchMovies(dto.expression).execute()} else{
+            imdbService.getMovieDetails((dto as MovieDetailsRequest).movieId).execute()
+        }
         val body = response.body()
         return if (body != null){
             body.apply { resultCode = response.code() }

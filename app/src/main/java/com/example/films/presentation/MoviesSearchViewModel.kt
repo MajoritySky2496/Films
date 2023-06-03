@@ -1,34 +1,20 @@
 package com.example.films.presentation
 
 
-import android.app.Application
-import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.os.Message
 import android.os.SystemClock
-import android.widget.Toast
-import androidx.constraintlayout.motion.utils.ViewState
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.example.films.util.Creator
 import com.example.films.R
 import com.example.films.domain.api.MoviesInteractor
 import com.example.films.domain.models.Movie
-import com.example.films.ui.movies.MoviesAdapter
 import com.example.films.ui.movies.models.MoviesState
-import com.example.films.ui.movies.models.ToastState
-import com.example.films.util.MoviesApplication
-import moxy.MvpPresenter
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.films.domain.api.ResourceProvider
 
-class MoviesSearchViewModel(application: Application):AndroidViewModel(application) {
-    private val moviesInteractor = Creator.provideMoviesInteractor(getApplication<Application>())
+class MoviesSearchViewModel(private val interactor: MoviesInteractor ,private val resourceProvider: ResourceProvider):ViewModel() {
+
     private val handler = Handler(Looper.getMainLooper())
 
 
@@ -36,17 +22,12 @@ class MoviesSearchViewModel(application: Application):AndroidViewModel(applicati
     private val stateLiveData = MutableLiveData<MoviesState>()
     fun observerState(): LiveData<MoviesState> = stateLiveData
 
-//    private val toastState = MutableLiveData<ToastState>(ToastState.None)
-//    fun observeToastState():LiveData<ToastState> = toastState
+
 
     private val showToast = SingleLiveEvent<String>()
     fun observeShowToast(): LiveData<String> = showToast
 
     private var lastSearchText: String? = null
-
-//    fun toastWasShown(){
-//        toastState.value = ToastState.None
-//    }
 
     override fun onCleared() {
         handler.removeCallbacksAndMessages(SEARCH_REQUEST_TOKEN)
@@ -71,15 +52,12 @@ class MoviesSearchViewModel(application: Application):AndroidViewModel(applicati
         )
 
     }
-//    fun showToast(message: String){
-//        toastState.postValue(message)
-//    }
 
     private fun searchRequest(newSearchText:String) {
         if (newSearchText.isNotEmpty()) {
             renderState(MoviesState.Loading)
 
-            moviesInteractor.searchMovies(
+            interactor.searchMovies(
                 newSearchText,
                 object : MoviesInteractor.MoviesConsumer {
                 override fun consume(foundMovies: List<Movie>?, errorMessage: String?) {
@@ -94,12 +72,12 @@ class MoviesSearchViewModel(application: Application):AndroidViewModel(applicati
                         when{
                             errorMessage!=null ->{
                                 MoviesState.Error(
-                                errorMessage  =getApplication<Application>().getString(R.string.something_went_wrong))
+                                errorMessage  =resourceProvider.getString(R.string.something_went_wrong))
 
                             }
                             movies.isEmpty() ->{
                                 MoviesState.Empty(
-                                    message = getApplication<Application>().getString(R.string.nothing_found)
+                                    message = resourceProvider.getString(R.string.nothing_found)
                                 )
 
                             }
@@ -121,11 +99,7 @@ class MoviesSearchViewModel(application: Application):AndroidViewModel(applicati
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
         private val SEARCH_REQUEST_TOKEN = Any()
 
-        fun getViewModelFactory(): ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                MoviesSearchViewModel(this[APPLICATION_KEY] as Application)
-            }
-        }
+
     }
 }
 

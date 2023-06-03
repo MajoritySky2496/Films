@@ -1,5 +1,6 @@
 package com.example.films.ui.movies
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 
@@ -18,6 +19,7 @@ class MoviesViewHolder(parent: ViewGroup) :RecyclerView.ViewHolder(LayoutInflate
     var title: TextView = itemView.findViewById(R.id.title)
     var description: TextView = itemView.findViewById(R.id.description)
 
+
     fun bind(movie: Movie) {
         title.text = movie.title
         description.text = movie.description
@@ -25,5 +27,8 @@ class MoviesViewHolder(parent: ViewGroup) :RecyclerView.ViewHolder(LayoutInflate
 
         Glide.with(itemView).load(movie.image).centerInside().into(cover)
 
+
+
     }
+
 }

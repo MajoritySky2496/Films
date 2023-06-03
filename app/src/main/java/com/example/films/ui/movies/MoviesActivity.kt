@@ -13,20 +13,15 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.films.util.Creator
 import com.example.films.R
 import com.example.films.domain.models.Movie
 import com.example.films.presentation.MoviesSearchViewModel
-import com.example.films.presentation.MoviesView
 import com.example.films.ui.movies.models.MoviesState
-import com.example.films.ui.movies.models.ToastState
-import com.example.films.ui.poster.PosterActivity
-import moxy.MvpActivity
-import moxy.presenter.InjectPresenter
-import moxy.presenter.ProvidePresenter
+import com.example.films.ui.detail.DetailActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class MoviesActivity : ComponentActivity() {
 
@@ -39,8 +34,9 @@ class MoviesActivity : ComponentActivity() {
 
     private val adapter = MoviesAdapter {
         if (clickDebounce()) {
-            val intent = Intent(this, PosterActivity::class.java)
+            val intent = Intent(this, DetailActivity::class.java)
             intent.putExtra("poster", it.image)
+            intent.putExtra("id", it.id)
             startActivity(intent)
         }
     }
@@ -50,7 +46,10 @@ class MoviesActivity : ComponentActivity() {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private lateinit var viewModel:MoviesSearchViewModel
+
+    private val  viewModel: MoviesSearchViewModel by viewModel{
+        parametersOf(this)
+    }
 
 
 
@@ -68,7 +67,7 @@ class MoviesActivity : ComponentActivity() {
 
 
         moviesList.adapter = adapter
-        viewModel = ViewModelProvider(this, MoviesSearchViewModel.getViewModelFactory())[MoviesSearchViewModel::class.java]
+
 
 
 
