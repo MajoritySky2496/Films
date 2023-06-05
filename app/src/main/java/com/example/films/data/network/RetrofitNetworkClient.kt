@@ -32,11 +32,9 @@ class RetrofitNetworkClient(private val context: Context):NetworkClient {
         if(isConnected() == false){
             return Response().apply { resultCode = -1 }
         }
-        if ((dto !is MoviesSearchRequest)&&(dto !is MovieDetailsRequest)) {
-            return Response().apply { resultCode = 400 }
-        }
-        val response = if(dto is MoviesSearchRequest){ imdbService.searchMovies(dto.expression).execute()} else{
-            imdbService.getMovieDetails((dto as MovieDetailsRequest).movieId).execute()
+
+        val response = if(dto is MoviesSearchRequest){ imdbService.searchMovies(dto.expression).execute()}
+        else{ (imdbService.getMovieDetails((dto as MovieDetailsRequest).movieId)).execute()
         }
         val body = response.body()
         return if (body != null){

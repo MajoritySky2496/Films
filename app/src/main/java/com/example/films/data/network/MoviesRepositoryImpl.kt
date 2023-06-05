@@ -2,6 +2,7 @@ package com.example.films.data.network
 
 import com.example.films.R
 import com.example.films.data.NetworkClient
+import com.example.films.data.dto.MovieDetailsRequest
 import com.example.films.data.dto.MovieDetailsResponse
 import com.example.films.data.dto.MovieDto
 import com.example.films.data.dto.MoviesSearchRequest
@@ -35,7 +36,7 @@ class MoviesRepositoryImpl(private val networkClient: NetworkClient):MoviesRepos
     }
 
     override fun searchDetailMovies(movieId:String): Resource<MoviesDetail> {
-       val response = networkClient.doRequest(movieId)
+       val response = networkClient.doRequest(MovieDetailsRequest(movieId))
         return when(response.resultCode){
             -1 -> {
                 Resource.Error("Проверьте подключение к интернету")

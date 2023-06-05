@@ -7,7 +7,7 @@ import com.example.films.domain.api.MoviesInteractor
 import com.example.films.domain.models.MoviesDetail
 import com.example.films.ui.movies.models.MoviesDetailState
 
-class MoviesDetailViewModel(movieId:String, moviesInteractor:MoviesInteractor):ViewModel() {
+class MoviesDetailViewModel(private val movieId:String, private val moviesInteractor:MoviesInteractor):ViewModel() {
     private val stateLiveData = MutableLiveData<MoviesDetailState>()
     fun observerState(): LiveData<MoviesDetailState> = stateLiveData
     init {

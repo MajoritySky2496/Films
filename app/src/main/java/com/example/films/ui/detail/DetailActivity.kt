@@ -19,6 +19,7 @@ class DetailActivity:AppCompatActivity() {
     lateinit var movieId:String
     lateinit var imageUrl:String
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDetailsBinding.inflate(layoutInflater)
